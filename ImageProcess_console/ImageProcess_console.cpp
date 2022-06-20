@@ -11,7 +11,7 @@
 
 std::vector<std::string> get_files_inDir()
 {
-	std::string searching = "C:\\Users\\Optrontec\\Desktop\\Logolamp\\Samsung_T5\\new ng\\new ok\\89A945301_AU316LH\\";
+	std::string searching = "C:\\Users\\Optrontec\\Desktop\\Logolamp\\신형장비 cpt\\이물\\";
 
     std::vector<std::string> return_;
     
@@ -56,13 +56,13 @@ std::vector<std::string> split_files()
 int main()
 {
     
-   
+    std::string prefix("VW316_NEW_Resize_cellion");
     std::string directory_name("Result");
     
     std::string savePath = std::filesystem::current_path().string() +"\\" + directory_name;
     std::filesystem::create_directory(directory_name);
 
-    OpenCVImage Image(get_files_inDir(), savePath);
+    OpenCVImage Image(get_files_inDir(), savePath,prefix);
     Image.run();
 }
 

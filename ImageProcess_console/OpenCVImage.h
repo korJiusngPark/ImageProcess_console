@@ -21,11 +21,11 @@ class OpenCVImage
 
 
 public:
-	OpenCVImage(std::vector<std::string> filesPath, std::string savePath);
+	OpenCVImage(std::vector<std::string> filesPath, std::string savePath, std::string prefix);
 
 public:
 	void run();
-	void ImageProcessing(cv::Mat src,int count);
+	void ImageProcessing(cv::Mat src,int count, std::string prefix);
 	void saveImage(cv::Mat src, int count, std::string modelName);
 
 	void contours(cv::Mat src, int count);
@@ -38,7 +38,7 @@ public:
 
 	void find_contours(int, void*, cv::Mat img_gray);
 
-	cv::Mat resoultionInspection(cv::Mat src);
+	cv::Mat resoultionInspection(cv::Mat src, int count);
 	float getEdgeData(cv::Mat src);
 	cv::Mat getEdgeImage(cv::Mat src);
 	cv::Mat getEdgeMag(cv::Mat src);
@@ -48,5 +48,6 @@ public:
 public:
 	std::vector<std::string> m_filesPath;
 	std::string m_savePath;
+	std::string m_prefix;
 };
 

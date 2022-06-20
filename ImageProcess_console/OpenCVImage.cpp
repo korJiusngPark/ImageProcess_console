@@ -4,10 +4,11 @@ using namespace cv;
 
 
 
-OpenCVImage::OpenCVImage(std::vector<std::string> filesPath, std::string savePath)
+OpenCVImage::OpenCVImage(std::vector<std::string> filesPath, std::string savePath, std::string prefix)
 {
 	m_filesPath = filesPath;
 	m_savePath = savePath;
+	m_prefix = prefix;
 }
 
 void OpenCVImage::run()
@@ -17,22 +18,57 @@ void OpenCVImage::run()
 		image = cv::imread(m_filesPath[x]);
 
 		if(image.rows > 0 && image.cols >0)
-			ImageProcessing(image, x);
+			ImageProcessing(image, x,m_prefix);
 	}
 }
 
-void OpenCVImage::ImageProcessing(cv::Mat src,int count)
+void OpenCVImage::ImageProcessing(cv::Mat src,int count, string prefix)
 {
-	cv::Mat dst,buf,result;
+	cv::Mat dst,buf,result,roi,th,th2, gaussianBlur;
+	cv::resize(src, src, cv::Size(), 0.5,0.5);
+
 	src.copyTo(dst);
-	
+	GaussianBlur(dst, dst, cv::Size(3, 3), 0);
+	dst.copyTo(gaussianBlur);
+
+	/*Rect roi_rect;
+
+	roi_rect = getObjRoi(dst, 100);
+	dst(roi_rect).copyTo(result);
+
+	saveImage(result, count, "stain");*/
+
 	cv::cvtColor(dst, dst, cv::COLOR_BGR2GRAY);
-	cv::threshold(dst, dst, 40, 255, 0);
+	cv::threshold(dst, th, 55, 255, 0);
 
-	result = resoultionInspection(src);
-	saveImage(result,count, "edge");
+	//saveImage(th, count, "th");
 
-	contours(dst, count);
+
+	gaussianBlur(getObjRoi(th, 100)).copyTo(roi);
+	cv::cvtColor(roi, th2, cv::COLOR_BGR2GRAY);
+	cv::threshold(th2, th2, 55, 255, 0);
+	//saveImage(th2, count, "th2");
+
+	Mat edge_th = getEdgeImage(getEdgeMag(roi));
+	
+	Mat edge_data = getEdgeMag(roi);
+	
+	Mat edge_nom;
+	normalize(edge_data, edge_nom, 0, 255 , NORM_MINMAX);
+
+	//saveImage(edge_th, count, "edge");
+	//saveImage(edge_nom, count, "edge_nom");
+	saveImage(roi, count, prefix + "_DOT");
+
+
+	//GaussianBlur(roi, dst, cv::Size(3, 3), 0);
+
+	//saveImage(roi, count, prefix + "_OK");
+
+	//result = resoultionInspection(roi,count);
+	//saveImage(result,count,m_prefix + "edge_th");
+
+	contours(th2, count);
 	
 }
 
@@ -65,11 +101,12 @@ void OpenCVImage::contours(cv::Mat src, int count)
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
 
-	convert.convertTo(convert, CV_32SC1);
+	//convert.convertTo(convert, CV_32SC1);
 
-	find_contours(0, 0, src);
+	//find_contours(0, 0, src);
 
-	cv::findContours(convert, contours, hierarchy, cv::RETR_FLOODFILL, cv::CHAIN_APPROX_SIMPLE);
+	//cv::findContours(convert, contours, hierarchy, cv::RETR_FLOODFILL, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(convert, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 
 	cv::Mat drawing = cv::Mat(src.size(), CV_8UC1, cv::Scalar::all(0));
 	
@@ -79,17 +116,19 @@ void OpenCVImage::contours(cv::Mat src, int count)
 		int area = contourArea(contours[i]);
 		
 		if (area > 30) {
-			putText(drawing, to_string(flag), cv::Point(contours[i][0].x, contours[i][0].y), FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar::all(255), 1);
+			//putText(drawing, to_string(flag), cv::Point(contours[i][0].x, contours[i][0].y), FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar::all(255), 1);
 			flag++;
 			//putText(drawing, to_string(area), cv::Point(contours[i][0].x, contours[i][0].y), FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar::all(0), 1);
-			cv::drawContours(drawing, contours, i, cv::Scalar::all(255), 1,FILLED, hierarchy);
+			//cv::drawContours(drawing, contours, i, cv::Scalar::all(255), 1,FILLED, hierarchy);
+			cv::drawContours(drawing, contours, i, cv::Scalar::all(255), 1);
+
 		}
 	}
 
 	//buf = src(getObjRoi(drawing, 100));
 
 
-	saveImage(drawing, count, "drawing");
+	//saveImage(drawing, count, "drawing");
 	//saveImage(buf, count, "ROI");
 
 }
@@ -191,8 +230,8 @@ void OpenCVImage::draw_and_fill_contours(std::vector<std::vector<cv::Point>>& co
 	saveImage(contours_result, 0, "result");
 	saveImage(fill_contours_result, 0, "fill");
 
-	cv::imshow("Contours Result", contours_result);
-	cv::imshow("Fill Contours Result", fill_contours_result);
+	//cv::imshow("Contours Result", contours_result);
+	//cv::imshow("Fill Contours Result", fill_contours_result);
 }
 
 void OpenCVImage::find_contours(int, void*, cv::Mat img_gray)
@@ -201,7 +240,7 @@ void OpenCVImage::find_contours(int, void*, cv::Mat img_gray)
 	//cv::Canny(img_gray, canny_output, thresh, thresh * 2);
 	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours(img_gray, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(img_gray, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 
 	std::vector<std::vector<cv::Point>> hull(contours.size());
 	for (unsigned int i = 0, n = contours.size(); i < n; ++i) {
@@ -211,15 +250,21 @@ void OpenCVImage::find_contours(int, void*, cv::Mat img_gray)
 	draw_and_fill_contours(contours, hull, hierarchy, img_gray);
 }
 
-cv::Mat OpenCVImage::resoultionInspection(cv::Mat src)
+cv::Mat OpenCVImage::resoultionInspection(cv::Mat src , int count)
 {
-	cv::Mat edge_bin,edge_Image;
+	cv::Mat edge_bin,edge_Image, nomarlize_edge;
 	float edge_data = 0;
 
 	edge_bin = getEdgeMag(src);
 
 	//영역을 어떻게 나눌지 
 	edge_data = getEdgeData(edge_bin);
+
+	threshold(edge_bin, edge_bin, 0.1, 255, cv::THRESH_TOZERO);
+
+	normalize(edge_bin, nomarlize_edge, 0, 255, NORM_MINMAX);
+
+	saveImage(nomarlize_edge, count, m_prefix + "edge_nom");
 
 	edge_Image = getEdgeImage(edge_bin);
 
