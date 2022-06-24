@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /ImageProcess_console/Result
+/ImageProcess_console/새 폴더
+/ImageProcess_console/이물

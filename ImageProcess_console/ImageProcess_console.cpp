@@ -4,15 +4,17 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <io.h>>
+#include <io.h>
 #include <filesystem>
 #include <sstream>
 #include "OpenCVImage.h"
 
 std::vector<std::string> get_files_inDir()
 {
-	std::string searching = "C:\\Users\\Optrontec\\Desktop\\Logolamp\\신형장비 cpt\\이물\\";
-
+//	std::string searching = "C:\\Users\\USER\\Desktop\\7_5FB.945.292.C_SE316_LR_CUPRA\\이물\\";
+    //std::string searching = "C:\\Users\\USER\\Desktop\\7_5FB.945.292.C_SE316_LR_CUPRA\\7_5FB.945.292.C_SE316_LR_CUPRA\\NG\\";
+    std::string searching = "C:\\Users\\USER\\Desktop\\VW316 dot\\검출안되는애들\\";
+   // std::string searching = "C:\\Users\\USER\\Desktop\\육안선별_5FB.945.292.C_SE316_LR_CUPRA\\7_5FB.945.292.C_SE316_LR_CUPRA\\OK\\";
     std::vector<std::string> return_;
     
     for (const auto& file : std::filesystem::directory_iterator(searching))
@@ -56,7 +58,7 @@ std::vector<std::string> split_files()
 int main()
 {
     
-    std::string prefix("VW316_NEW_Resize_cellion");
+    std::string prefix("SE316");
     std::string directory_name("Result");
     
     std::string savePath = std::filesystem::current_path().string() +"\\" + directory_name;

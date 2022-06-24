@@ -34,9 +34,9 @@ public:
 
 	void draw_and_fill_contours(std::vector<std::vector<cv::Point>>& contours,
 		std::vector<std::vector<cv::Point>>& hull,
-		std::vector<cv::Vec4i>& hierarchy, cv::Mat img_gray);
+		std::vector<cv::Vec4i>& hierarchy, cv::Mat img_gray, int count);
 
-	void find_contours(int, void*, cv::Mat img_gray);
+	void find_contours( cv::Mat img_gray,int count);
 
 	cv::Mat resoultionInspection(cv::Mat src, int count);
 	float getEdgeData(cv::Mat src);
@@ -44,7 +44,16 @@ public:
 	cv::Mat getEdgeMag(cv::Mat src);
 
 	cv::Mat matSobelOperation(cv::Mat src, E_SOBEL_DIR dir);
+	float getROiEdgeData(cv::Mat edge_data);
+	int getROiEdgeData(cv::Mat edge_data,int x);
 
+	bool Resolution(cv::Mat src, int cols, int rows, int count);
+	cv::Mat contoursCheck(cv::Mat src, int countoursCnt, int sizeMin, int sizeMax,int count);
+
+	void dotInspection(cv::Mat src,int count);
+	cv::Mat dotarea(cv::Mat src);
+
+	cv::Mat m_tar_gray_obj, m_edge_data, m_result;
 public:
 	std::vector<std::string> m_filesPath;
 	std::string m_savePath;
